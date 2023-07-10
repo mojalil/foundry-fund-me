@@ -16,7 +16,10 @@ contract HelperConfig {
     constructor(){
         if(block.chainid == 11155111){
             activeNetworkConfig = getSepoliaEthConfig();
-        } else {
+        } 
+        else if (block.chainid == 1){
+            activeNetworkConfig = getMainNetEthConfig();}
+        else {
             activeNetworkConfig = getAnvilEthconfig();
         }
     }
@@ -27,6 +30,14 @@ contract HelperConfig {
         });
 
         return sepoliaConfig;
+    }
+
+    function getMainNetEthConfig() public pure returns (NetworkConfig memory) {
+        NetworkConfig memory mainNetConfig = NetworkConfig({
+            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+        });
+
+        return mainNetConfig;
     }
 
     function getAnvilEthconfig() public pure returns (NetworkConfig memory) {
