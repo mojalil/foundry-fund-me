@@ -38,6 +38,10 @@ contract FundMe {
         if (msg.sender != i_owner) revert Not__Owner();
         _;
     }
+
+    function getFunder(uint256 index) public view returns (address) {
+        return s_funders[index];
+    }
     
     function withdraw() public onlyOwner {
         for (uint256 funderIndex=0; funderIndex < s_funders.length; funderIndex++){
@@ -70,6 +74,10 @@ contract FundMe {
 
     function getAddressToAmountFunded(address fundingAddress) external view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getOwner() external view returns (address) {
+        return i_owner;
     }
 
 

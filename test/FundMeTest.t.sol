@@ -14,7 +14,6 @@ contract FundMeTest is Test {
 
     address USER = makeAddr("user");
 
-
     // Decimals do not work in solidity but with ether keyword we can
     uint256 constant SEND_VALUE = 0.1 ether;
 
@@ -52,5 +51,46 @@ contract FundMeTest is Test {
         fundMe.fund{value: SEND_VALUE}();
         uint256 amountFunded = fundMe.getAddressToAmountFunded(USER);
         assertEq(amountFunded, SEND_VALUE);
+    }
+
+    function testAddsFunderToArrayOfFunders() public {
+        vm.prank(USER); // The next TX will be from USER
+        fundMe.fund{value: SEND_VALUE}();
+
+        address funder = fundMe.getFunder(0);
+        assertEq(funder, USER);
+    }
+
+    modifier funded() {
+        vm.prank(USER); // The next TX will be from USER
+        fundMe.fund{value: SEND_VALUE}();
+        _;
+    }
+
+    function testOnlyOwnerCanWithdraw() public funded {
+
+        // The user isnt the owner , so let's prank to the user and then withdraw
+        vm.prank(USER);
+        // We expect a revert, using the foundry cheatcode we can test for this
+        vm.expectRevert();
+        fundMe.withdraw();
+    }
+
+    function testWithDrawWithASingleFunder() public funded {
+        // Arrange
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        // Act
+        vm.prank(fundMe.getOwner());
+        fundMe.withdraw();
+
+        // Assert
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingFundMeBalance = address(fundMe).balance;
+
+        assertEq(endingOwnerBalance, 0);
+        assertEq(startingFundMeBalance + endingOwnerBalance, endingOwnerBalance);
+
     }
 }
