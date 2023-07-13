@@ -93,4 +93,33 @@ contract FundMeTest is Test {
         assertEq(startingFundMeBalance + endingOwnerBalance, endingOwnerBalance);
 
     }
+
+    function testWithDrawWithMultipleFunders() public funded {
+        // Arrange 
+        // Use 160 becuase it is the same uint as the address, that we plan to mock
+        uint160 numberOfFunders = 10;
+        uint160 startingFunderIndex = 1;
+
+        for (uint160 i = 0; i < numberOfFunders; i++) {
+            // use hoax to make a new address
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        // Act
+        vm.startPrank(fundMe.getOwner());
+        fundMe.withdraw();
+        vm.stopPrank();
+
+        // Assert
+        assert(address(fundMe).balance == 0);
+        assert(startingFundMeBalance + startingOwnerBalance == fundMe.getOwner().balance);
+
+
+
+
+    }
 }
